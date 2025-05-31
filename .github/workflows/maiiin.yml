@@ -1,0 +1,33 @@
+name: Temp VPS via Docker + tmate
+
+on: [workflow_dispatch]
+
+jobs:
+  tmate-session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Start tmate session (Interactive SSH)
+        uses: mxschmitt/action-tmate@v3
+
+  build-container:
+    needs: tmate-session   # <-- Depends on previous job finishing
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t my-temp-vps .
+
+      - name: Run Docker container
+        run: docker run -dit --name temp-vps my-temp-vps
+
+      - name: Log reminder
+        run: echo "Run 'docker exec -it temp-vps bash' to enter the container"
